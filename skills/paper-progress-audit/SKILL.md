@@ -1,5 +1,5 @@
 ---
-name: progress-audit
+name: paper-progress-audit
 description: Generate a research-project progress audit by comparing local docs, paper LaTeX claims, repository implementation, tests, and current completion devlog.
 agent: agent
 ---
