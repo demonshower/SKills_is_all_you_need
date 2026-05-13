@@ -15,12 +15,12 @@ allowed-tools: Read, Write
 - 可选参数：
   - `strictness`：1–5，默认 3
   - `target_rating`：指定倾向评分，若使用必须让正文理由支撑该评分
-  - `output_name`：默认 `review-final.md`
+  - `output_name`：默认 `review-final.md` 和 `review-final-cn.md`
 
 ## 目标
 - 抽取多个 review 的共识与分歧
 - 剔除误读、重复、模板化句子
-- 生成一份像单个审稿人写出的统一、连贯、基于证据的最终意见
+- 生成一份像单个审稿人写出的统一、连贯、基于证据的最终意见，包含2份英文和中文版本。
 
 ## 工作流
 1. 读取 `template.docx`，确定最终输出结构和字段。

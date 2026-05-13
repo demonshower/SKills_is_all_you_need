@@ -13,13 +13,13 @@ allowed-tools: Read, Write
 - `template.docx`：审稿模板，字段以该文件为准
 - 可选：`example.docx`：已填写审稿示例，仅用于学习格式、信息量、语气
 - 可选参数：
-  - `model_name`：输出文件名，格式为 `review-<model_name>.md`，未提供时使用 `review-agent.md`
+  - `model_name`：输出文件名，格式为 `review-<model_name>.md` 和 `review-<model_name>-cn.md`。
   - `strictness`：1–5，默认 3；数字越高，审稿越严格
 
 ## 目标
 - 先读取模板，抽取必填字段、评分项目、选项和规则
 - 再通读论文，记录研究问题、方法、实验、结果和潜在局限
-- 输出一份自然、克制、内容具体、符合模板字段的审稿 Markdown
+- 输出2份自然、克制、内容具体、符合模板字段的审稿 Markdown，一份英文，一份对应的中文。
 
 ## 工作流
 1. 先读取 `template.docx`，明确输出字段、评分项和评分规则。
