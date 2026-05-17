@@ -16,42 +16,178 @@
 
 ## 安装与使用
 
-将本仓库的 `skills` 目录链接到 Agent 工具的 skills 搜索路径即可。根据你的操作系统选择对应方式：
+先说结论：GitHub Copilot（VS Code / Copilot CLI / cloud agent）不会因为仓库根目录存在 `skills/` 就自动发现它；它只会从约定路径扫描 skills。
+
+对 VS Code GitHub Copilot 来说，常见扫描位置是：
+
+- 个人级 skills 目录：`~/.copilot/skills`（推荐只保留这一处，避免候选列表出现重复项）
+- 仓库级 skills 目录：`.github/skills`
+- 兼容目录：`~/.agents/skills`、`.agents/skills`、`.claude/skills`（仅在你确实需要兼容其它 agent 时再用；如果同一份 skills 同时链接到多个入口，Copilot 的候选列表可能会出现重复）
+
+下面给出“只保留 Copilot”的推荐安装方式。
 
 ### macOS / Linux
 
 ```bash
-# Claude Code
-ln -s "<仓库绝对路径>/skills" "$HOME/.claude/skills"
-
-# Agents（如适用）
-ln -s "<仓库绝对路径>/skills" "$HOME/.agents/skills"
-
-# Codex（如适用）
-ln -s "<仓库绝对路径>/skills" "$HOME/.codex/skills"
+# GitHub Copilot in VS Code / Copilot CLI
+mkdir -p "$HOME/.copilot"
+rm -rf "$HOME/.copilot/skills"
+ln -s "<仓库绝对路径>/skills" "$HOME/.copilot/skills"
 ```
 
-### Windows (CMD)
+如果你希望“打开当前仓库时 Copilot 立刻发现 skills”，还可以在仓库根目录创建仓库级入口：
 
-```cmd
-cmd /c mklink /J "%USERPROFILE%\.claude\skills" "<仓库目录>\skills"
-
-cmd /c mklink /J "%USERPROFILE%\.agents\skills" "<仓库目录>\skills"
-
-cmd /c mklink /J "%USERPROFILE%\.codex\skills" "<仓库目录>\skills"
+```bash
+rm -rf .github/skills
+mkdir -p .github
+ln -s "$(pwd)/skills" .github/skills
 ```
 
-### Windows (PowerShell)
+### Windows
+
+在 Windows 上推荐创建 junction。下面的命令只创建 GitHub Copilot 所需的 `%USERPROFILE%\.copilot\skills`（推荐做法：只保留这一处，避免 Copilot 候选列表出现重复）。
+
+注意：请在 PowerShell 或 CMD 中以管理员身份运行，或确保当前账户有创建联接的权限。
+
+#### PowerShell
 
 ```powershell
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills" -Target "<仓库目录>\skills"
+# 将下面路径替换为你本地仓库的 skills 绝对路径
+$repo = 'E:\path\to\repo\skills'
 
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills" -Target "<仓库目录>\skills"
+$copilotDir = "$env:USERPROFILE\.copilot"
+$copilotSkills = "$env:USERPROFILE\.copilot\skills"
 
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.codex\skills" -Target "<仓库目录>\skills"
+if (-not (Test-Path $copilotDir)) {
+  New-Item -ItemType Directory -Path $copilotDir | Out-Null
+}
+
+if (Test-Path $copilotSkills) {
+  Remove-Item -Recurse -Force -Path $copilotSkills
+}
+
+New-Item -ItemType Junction -Path $copilotSkills -Target $repo | Out-Null
+
+# 可选（不推荐，除非你明确需要兼容其它 agent）：
+# New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills" -Target $repo | Out-Null
+# New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills" -Target $repo | Out-Null
 ```
 
-> 移除链接只需删除对应的符号链接/联接目录，不会影响仓库内容。
+如果你想做“仓库级”安装，在仓库根目录执行：
+
+```powershell
+if (-not (Test-Path '.github')) {
+  New-Item -ItemType Directory -Path '.github' | Out-Null
+}
+
+if (Test-Path '.github\skills') {
+  Remove-Item -Recurse -Force '.github\skills'
+}
+
+New-Item -ItemType Junction -Path '.github\skills' -Target (Join-Path (Get-Location) 'skills') | Out-Null
+```
+
+#### CMD
+
+```cmd
+set REPO=E:\path\to\repo\skills
+
+if not exist "%USERPROFILE%\.copilot" mkdir "%USERPROFILE%\.copilot"
+
+if exist "%USERPROFILE%\.copilot\skills" rmdir /S /Q "%USERPROFILE%\.copilot\skills"
+
+cmd /c mklink /J "%USERPROFILE%\.copilot\skills" "%REPO%"
+
+rem 可选（不推荐，除非你明确需要兼容其它 agent）：
+rem if not exist "%USERPROFILE%\.agents" mkdir "%USERPROFILE%\.agents"
+rem if not exist "%USERPROFILE%\.claude" mkdir "%USERPROFILE%\.claude"
+rem if exist "%USERPROFILE%\.agents\skills" rmdir /S /Q "%USERPROFILE%\.agents\skills"
+rem if exist "%USERPROFILE%\.claude\skills" rmdir /S /Q "%USERPROFILE%\.claude\skills"
+rem cmd /c mklink /J "%USERPROFILE%\.agents\skills" "%REPO%"
+rem cmd /c mklink /J "%USERPROFILE%\.claude\skills" "%REPO%"
+```
+
+如果你想做“仓库级”安装，在仓库根目录执行：
+
+```cmd
+if not exist ".github" mkdir ".github"
+if exist ".github\skills" rmdir /S /Q ".github\skills"
+cmd /c mklink /J ".github\skills" "%CD%\skills"
+```
+
+## 删除所有 links（清理/卸载）
+
+下面的命令用于“删除 skills 的链接入口”（symlink/junction）。它们只会删除 link 本身，不会删除你的真实 `skills/` 目录内容。
+
+> 什么时候需要：你发现 Copilot 候选出现重复（通常是同一份 skills 被同时链接到了多个入口目录），或者你想在新机器/新环境重新验证安装流程。
+
+### macOS / Linux
+
+个人级（推荐清理项）：
+
+```bash
+rm -rf "$HOME/.copilot/skills"
+rm -rf "$HOME/.agents/skills"
+rm -rf "$HOME/.claude/skills"
+```
+
+仓库级（在你的仓库根目录执行）：
+
+```bash
+rm -rf .github/skills
+rm -rf .agents/skills
+rm -rf .claude/skills
+```
+
+### Windows
+
+#### PowerShell
+
+```powershell
+$paths = @(
+  "$env:USERPROFILE\.copilot\skills",
+  "$env:USERPROFILE\.agents\skills",
+  "$env:USERPROFILE\.claude\skills",
+  ".github\skills",
+  ".agents\skills",
+  ".claude\skills"
+)
+
+foreach ($p in $paths) {
+  if (Test-Path $p) {
+    $item = Get-Item -LiteralPath $p -Force
+    if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+      # Junction / Symlink
+      [System.IO.Directory]::Delete($p)
+    } else {
+      Write-Host "SKIP (not a link): $p"
+    }
+  }
+}
+```
+
+#### CMD
+
+```cmd
+rmdir /S /Q "%USERPROFILE%\.copilot\skills"
+rmdir /S /Q "%USERPROFILE%\.agents\skills"
+rmdir /S /Q "%USERPROFILE%\.claude\skills"
+rmdir /S /Q ".github\skills"
+rmdir /S /Q ".agents\skills"
+rmdir /S /Q ".claude\skills"
+```
+
+## VS Code 里如何确认生效
+
+1. 确保使用的是 GitHub Copilot Chat 的 `Agent` 模式。
+2. 重启 VS Code，或执行一次 `Developer: Reload Window`。
+3. 如果你做的是个人级安装，确认目标目录下确实能看到 `~/.copilot/skills/<skill-name>/SKILL.md`。
+4. 如果你做的是仓库级安装，确认当前仓库存在 `.github/skills/<skill-name>/SKILL.md`。
+5. 在提问时明确提到 skill 覆盖的任务，例如“帮我把这组实验数据画成论文风格图表”，观察 Copilot 是否引用对应 skill。
+
+## 为什么候选会出现重复
+
+最常见的原因是：你把同一份 skills 同时链接到了多个入口目录（例如同时存在 `~/.copilot/skills`、`~/.agents/skills`、`~/.claude/skills`），Copilot 的候选列表可能不会去重，于是显示多条相同 skill（推荐只保留 `~/.copilot/skills`）。
 
 ## 调用示例
 
