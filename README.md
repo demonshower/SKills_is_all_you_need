@@ -17,6 +17,17 @@
 | `code-explain` | 自顶向下地向初学者解释代码结构与逻辑 |
 | `karpathy-guidelines` | 约束编码过程不过度设计、只做外科手术式修改，并要求可验证成功标准 |
 | `create-skill` | 交互式创建新的 Claude Code skill，生成标准 SKILL.md |
+| `paper-workflow` | 按稿件阶段编排学术论文工作流 |
+| `manuscript-optimizer` | 检查并修复论文主张、证据链、图表和术语的一致性 |
+| `scientific-writing` | 起草或重写学术论文段落与章节 |
+| `write-scientific-manuscript` | 诊断并改善段落和章节的论证清晰度 |
+| `scientific-prose-style` | 检查科学写作的句子表达、节奏和语气 |
+| `anti-defensive-writing` | 识别论文中过度防御和不必要的自我削弱表达 |
+| `results-section-revision` | 改善 Results 小节的组织、衔接和论证推进 |
+| `review-article-architecture` | 规划或审查综述、survey 和 Perspective 的整体架构 |
+| `nature-portfolio-playbook` | 辅助选择 Nature Portfolio 期刊及文章类型 |
+
+新增的 9 个学术写作 skills 来自 [Boom5426/Nature-Paper-Skills](https://github.com/Boom5426/Nature-Paper-Skills)，来源版本为 `c734748f1b637a54ed600bf2ccb8f9e9c19b0c7a`。`paper-workflow` 是该套件的部分导入；它还会提到本仓库未包含的其他 skills，使用相关分支时需按提示安装或选择已有工作流。
 
 ## 安装与使用
 
