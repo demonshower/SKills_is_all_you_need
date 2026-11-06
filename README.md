@@ -9,7 +9,7 @@
 | Skill | 说明 |
 |-------|------|
 | `plot-data` | 基于 matplotlib/seaborn 生成符合 Nature/Science 期刊标准的科研数据可视化 |
-| `zh-agent-slides` | 按模板制作中文技术报告 PPTX，加入带标注的论文原图、源码截图和可编辑示意图 |
+| [`zh-agent-slides`](skills/zh-agent-slides/SKILL.md) | 制作中文技术报告 PPTX，内置可编辑参考模板，支持论文原图、源码标注和技术示意图 |
 | `paper-figure-workflow` | 从 LaTeX、代码和规划文档生成/刷新完整的论文配图集 |
 | `paper-progress-audit` | 对比文档、论文声明、代码实现与测试，生成科研项目进度审计报告 |
 | `paper-translator` | 面向论文精读场景的英↔中学术翻译，附术语表与难点注释 |
